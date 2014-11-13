@@ -211,6 +211,7 @@
 			<xsl:apply-templates select="sn" mode="publication-info"/>
 			<xsl:apply-templates select="bn" mode="publication-info"/>
 			<xsl:apply-templates select="la" mode="publication-info"/>
+			<xsl:apply-templates select="ls" mode="publication-info"/>
 			<xsl:apply-templates select="re" mode="publication-info"/>
 			<xsl:apply-templates select="ms" mode="publication-info"/>
 			<xsl:apply-templates select="." mode="affiliation-info"/>
@@ -234,7 +235,9 @@
 	<xsl:template match="la" mode="publication-info">
 		<xsl:call-template name="backslash-split"><xsl:with-param name="element-name">language</xsl:with-param><xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param></xsl:call-template>
 	</xsl:template>
-	<xsl:template match="ms" mode="publication-info"><supplementary-information><xsl:value-of select="normalize-space(.)"/></supplementary-information></xsl:template>
+	<xsl:template match="ls" mode="publication-info">
+		<xsl:call-template name="backslash-split"><xsl:with-param name="element-name">language-summary</xsl:with-param><xsl:with-param name="value"><xsl:value-of select="."/></xsl:with-param></xsl:call-template>
+	</xsl:template>
 	<xsl:template match="re" mode="publication-info">
 		<number-of-references>
 			<xsl:attribute name="orginal-content"><xsl:value-of select="."/></xsl:attribute>
@@ -283,7 +286,7 @@
 		Update this XPath with any element names that have been explicitly matched for publication info
 		processing.  Anything not in this list will be flagged as unhandled.
 	-->
-	<xsl:template match="do|it|et|ft|at|au|ad|av|ca|oi|yr|vl|no|pp|sn|ur|la|pb|aa|lp|cp|em|re|ms|bn|bt|ed|ct|cl" mode="unknown"/>
+	<xsl:template match="do|it|et|ft|at|au|ad|av|ca|oi|yr|vl|no|pp|sn|ur|la|ls|pb|aa|lp|cp|em|re|ms|bn|bt|ed|ct|cl" mode="unknown"/>
 	<xsl:template match="*" mode="unknown">
 			<UNHANDLED-ELEMENT>
 				<xsl:copy-of select="."/>
