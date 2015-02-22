@@ -34,16 +34,16 @@ as cts:query?
   (: To implement a new operator, simply add it to this code :)
   if (empty($list)) then ()
   (: simple boolean :)
-  else if (empty($op) or $op eq 'AND') then cts:and-query($list)
-  else if ($op = ('NOT', '-')) then cts:not-query($list)
-  else if ($op = ('OR','|')) then cts:or-query($list)
+  else if (empty($op) or $op eq 'and') then cts:and-query($list)
+  else if ($op = ('not', '-')) then cts:not-query($list)
+  else if ($op = ('or','|')) then cts:or-query($list)
   (: near and variations :)
-  else if ($op eq 'NEAR') then cts:near-query($list)
-  else if (starts-with($op, 'NEAR/')) then cts:near-query(
-    $list, xs:double(substring-after($op, 'NEAR/')))
-  else if ($op eq 'ONEAR') then cts:near-query($list, (), 'ordered')
-  else if (starts-with($op, 'ONEAR/')) then cts:near-query(
-    $list, xs:double(substring-after($op, 'ONEAR/')), 'ordered')
+  else if ($op eq 'near') then cts:near-query($list)
+  else if (starts-with($op, 'near/')) then cts:near-query(
+    $list, xs:double(substring-after($op, 'near/')))
+  else if ($op eq 'onear') then cts:near-query($list, (), 'ordered')
+  else if (starts-with($op, 'onear/')) then cts:near-query(
+    $list, xs:double(substring-after($op, 'onear/')), 'ordered')
   else error((), 'UNEXPECTED')
 };
 

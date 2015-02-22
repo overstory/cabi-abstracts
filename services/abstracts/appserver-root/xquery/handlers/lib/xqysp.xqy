@@ -60,44 +60,48 @@ declare private variable $DEBUG as xs:boolean := false();
 
 declare private variable $TOKS as cts:token* := ();
 
-declare private variable $TOKS-COUNT as xs:integer := count($TOKS);
+declare private variable $TOKS-COUNT as xs:integer := fn:count ($TOKS);
 
 declare private variable $X as xs:integer := -1;
 
-declare variable $TOK-AND := cts:word('AND');
+declare variable $TOK-AND := (cts:word('AND'), cts:word('and'), cts:punctuation('+'));
 declare variable $TOK-APOS := cts:punctuation("'");
 declare variable $TOK-GROUP-START := cts:punctuation('(');
 declare variable $TOK-GROUP-END := cts:punctuation(')');
 declare variable $TOK-HYPHEN := cts:punctuation('-');
-declare variable $TOK-NEAR := cts:word('NEAR');
-declare variable $TOK-NOT := cts:word('NOT');
-declare variable $TOK-ONEAR := cts:word('ONEAR');
-declare variable $TOK-OR := cts:word('OR');
+declare variable $TOK-NEAR := (cts:word('NEAR'), cts:word('near'));
+declare variable $TOK-NOT := (cts:word('NOT'), cts:word('not'));
+declare variable $TOK-ONEAR := (cts:word('ONEAR'), cts:word('onear'));
+declare variable $TOK-OR := (cts:word('OR'), cts:word('or'));
 declare variable $TOK-QUOTE := cts:punctuation('"');
 declare variable $TOK-SPACE := cts:space(' ');
 declare variable $TOK-UNDERSCORE := cts:punctuation('_');
 
-declare variable $TOKS-FIELD := (
-  cts:punctuation(':'), cts:punctuation('='),
-  $TOKS-INEQ);
+declare variable $TOKS-FIELD := ( cts:punctuation(':'), cts:punctuation('='), $TOKS-INEQ);
 (: for range query terms - inequality :)
-declare variable $TOKS-INEQ := (
-   cts:punctuation('!'), cts:punctuation('>'), cts:punctuation('<'));
-declare variable $TOKS-INEQ-VALID := (
-  $TOKS-INEQ,
-  cts:punctuation('!='), cts:punctuation('>='), cts:punctuation('<=')) ;
+declare variable $TOKS-INEQ := ( cts:punctuation('!'), cts:punctuation('>'), cts:punctuation('<'));
+declare variable $TOKS-INEQ-VALID := ( $TOKS-INEQ, cts:punctuation('!='), cts:punctuation('>='), cts:punctuation('<='));
 declare variable $TOKS-INFIX := ($TOK-AND, $TOK-NEAR, $TOK-ONEAR, $TOKS-OR);
 declare variable $TOKS-OP-JOIN := (cts:punctuation('/'));
-declare variable $TOKS-OR := (cts:punctuation('|'), cts:word('OR'));
-declare variable $TOKS-PREFIX := (
-  $TOK-NOT, cts:punctuation('-'),
-  cts:punctuation('+'), cts:punctuation('~'));
-declare variable $TOKS-WILDCARD := (
-  cts:punctuation('*'), cts:punctuation('?'));
-declare variable $TOKS-WORD-JOIN := (
-  $TOK-APOS, $TOK-HYPHEN, $TOK-UNDERSCORE, $TOKS-WILDCARD);
+declare variable $TOKS-OR := (cts:punctuation('|'), $TOK-OR);
+declare variable $TOKS-PREFIX := ( $TOK-NOT, cts:punctuation('-'), cts:punctuation('+'), cts:punctuation('~'));
+declare variable $TOKS-WILDCARD := ( cts:punctuation('*'), cts:punctuation('?'));
+declare variable $TOKS-WORD-JOIN := ( $TOK-APOS, $TOK-HYPHEN, $TOK-UNDERSCORE, $TOKS-WILDCARD);
 
-declare function p:debug-set($debug as xs:boolean)
+declare variable $canonical-values as map:map := map:map (
+	<map:map xmlns:map="http://marklogic.com/xdmp/map">
+		<map:entry key="AND"><map:value>and</map:value></map:entry>
+		<map:entry key="+"><map:value>and</map:value></map:entry>
+		<map:entry key="OR"><map:value>or</map:value></map:entry>
+		<map:entry key="|"><map:value>or</map:value></map:entry>
+		<map:entry key="NOT"><map:value>not</map:value></map:entry>
+		<map:entry key="-"><map:value>not</map:value></map:entry>
+		<map:entry key="NEAR"><map:value>near</map:value></map:entry>
+		<map:entry key="ONEAR"><map:value>onear</map:value></map:entry>
+	</map:map>
+);
+
+declare function p:debug-set ($debug as xs:boolean)
 as empty-sequence() {
   xdmp:set($DEBUG, $debug)
 };
@@ -142,6 +146,15 @@ declare function p:error($code as xs:string)
  as empty-sequence()
 {
   p:error($code, ())
+};
+
+declare private function p:canonical-value (
+	$value as xs:string?
+) as xs:string?
+{
+	if (fn:exists (map:get ($canonical-values, $value)))
+	then map:get ($canonical-values, $value)
+	else $value
 };
 
 declare private function p:empty() as xs:boolean
@@ -228,7 +241,7 @@ as element()? {
     if ($type eq 'prefix') then 1 else 2,
     $list,
     (attribute type { $type },
-      attribute op { $op }))
+      attribute op { p:canonical-value ($op) }))
 };
 
 (: caller does not want single group :)
@@ -431,7 +444,7 @@ as element()?
     ('infix-expr:', $op, count($stack), xdmp:describe($stack)))
   ,
   element expression {
-    attribute op { $op },
+    attribute op { p:canonical-value ($op) },
     attribute type { 'infix' },
     $stack}
 };
