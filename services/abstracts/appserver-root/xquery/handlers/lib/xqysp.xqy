@@ -76,6 +76,7 @@ declare variable $TOK-OR := (cts:word('OR'), cts:word('or'));
 declare variable $TOK-QUOTE := cts:punctuation('"');
 declare variable $TOK-SPACE := cts:space(' ');
 declare variable $TOK-UNDERSCORE := cts:punctuation('_');
+declare variable $TOK-DOT := cts:punctuation('.');
 
 declare variable $TOKS-FIELD := ( cts:punctuation(':'), cts:punctuation('='), $TOKS-INEQ);
 (: for range query terms - inequality :)
@@ -86,7 +87,7 @@ declare variable $TOKS-OP-JOIN := (cts:punctuation('/'));
 declare variable $TOKS-OR := (cts:punctuation('|'), $TOK-OR);
 declare variable $TOKS-PREFIX := ( $TOK-NOT, cts:punctuation('-'), cts:punctuation('+'), cts:punctuation('~'));
 declare variable $TOKS-WILDCARD := ( cts:punctuation('*'), cts:punctuation('?'));
-declare variable $TOKS-WORD-JOIN := ( $TOK-APOS, $TOK-HYPHEN, $TOK-UNDERSCORE, $TOKS-WILDCARD);
+declare variable $TOKS-WORD-JOIN := ( $TOK-APOS, $TOK-HYPHEN, $TOK-UNDERSCORE, $TOKS-WILDCARD, $TOK-DOT);
 
 declare variable $canonical-values as map:map := map:map (
 	<map:map xmlns:map="http://marklogic.com/xdmp/map">

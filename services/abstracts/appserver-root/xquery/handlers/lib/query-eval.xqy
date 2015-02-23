@@ -31,8 +31,9 @@ declare namespace cabi = "http://namespaces.cabi.org/namespaces/cabi";
 (: ------------------------------- :)
 
 declare variable $publisher-qname := xs:QName ("cabi:publisher");
-declare variable $item-title-qname := xs:QName ("cabi:item-type");
+declare variable $item-title-qname := xs:QName ("cabi:item-title");
 declare variable $non-english-title-qname := xs:QName ("cabi:non-english-title");
+declare variable $additional-title-info-qname := xs:QName ("cabi:additional-title-info");
 declare variable $author-qname := xs:QName ("cabi:author");
 declare variable $author-variant-qname := xs:QName ("cabi:author-variant");
 declare variable $editor-qname := xs:QName ("cabi:editor");
@@ -44,10 +45,22 @@ declare variable $pan-qname := xs:QName ("cabi:pan");
 declare variable $issn-qname := xs:QName ("cabi:issn");
 declare variable $isbn-qname := xs:QName ("cabi:isbn");
 declare variable $doi-qname := xs:QName ("cabi:doi");
+declare variable $affiliation-qname := xs:QName ("cabi:affiliation-qname");
+declare variable $country-qname := xs:QName ("cabi:country");
+declare variable $email-qname := xs:QName ("cabi:email");
+declare variable $item-type-qname := xs:QName ("cabi:item-type");
+declare variable $language-qname := xs:QName ("cabi:language");
+declare variable $language-summary-qname := xs:QName ("cabi:language-summary");
+declare variable $supplementary-information-qname := xs:QName ("cabi:supplementary-information");
 
 (: ------------------------------- :)
 
-declare private variable $value-fields := ( $pan-qname, $issn-qname, $isbn-qname, $doi-qname );
+(: ToDo: Compound elements: affiliation, author, editor :)
+(: ToDo: Look at iso country code on language element, also on country element :)
+(: FixMe: Document Title Descriptor: ED :)
+(: FixMe: LP (Language of Publisher) is matched as publisher city in XSLT :)
+
+declare private variable $value-fields := ( $pan-qname, $issn-qname, $isbn-qname, $doi-qname, $email-qname, $item-type-qname );
 
 declare private variable $field-qnames as map:map := map:map (
 	<map:map xmlns:map="http://marklogic.com/xdmp/map">
@@ -93,6 +106,39 @@ declare private variable $field-qnames as map:map := map:map (
 		<map:entry key="isbn"><map:value>{ $isbn-qname }</map:value></map:entry>
 		<map:entry key="oi"><map:value>{ $doi-qname }</map:value></map:entry>
 		<map:entry key="doi"><map:value>{ $doi-qname }</map:value></map:entry>
+
+		<map:entry key="aa"><map:value>{ $affiliation-qname }</map:value></map:entry>
+		<map:entry key="affiliation"><map:value>{ $affiliation-qname }</map:value></map:entry>
+		<map:entry key="author-affiliation"><map:value>{ $affiliation-qname }</map:value></map:entry>
+
+		<map:entry key="at"><map:value>{ $additional-title-info-qname }</map:value></map:entry>
+		<map:entry key="additional-title-data"><map:value>{ $additional-title-info-qname }</map:value></map:entry>
+		<map:entry key="additional-title-info"><map:value>{ $additional-title-info-qname }</map:value></map:entry>
+
+		<map:entry key="cp"><map:value>{ $country-qname }</map:value></map:entry>
+		<map:entry key="country-pub"><map:value>{ $country-qname }</map:value></map:entry>
+		<map:entry key="pub-country"><map:value>{ $country-qname }</map:value></map:entry>
+		<map:entry key="country-publication"><map:value>{ $country-qname }</map:value></map:entry>
+		<map:entry key="country-of-publication"><map:value>{ $country-qname }</map:value></map:entry>
+
+		<map:entry key="em"><map:value>{ $email-qname }</map:value></map:entry>
+		<map:entry key="email"><map:value>{ $email-qname }</map:value></map:entry>
+
+		<map:entry key="it"><map:value>{ $item-type-qname }</map:value></map:entry>
+		<map:entry key="item-type"><map:value>{ $item-type-qname }</map:value></map:entry>
+
+		<map:entry key="la"><map:value>{ $language-qname }</map:value></map:entry>
+		<map:entry key="lang"><map:value>{ $language-qname }</map:value></map:entry>
+		<map:entry key="language"><map:value>{ $language-qname }</map:value></map:entry>
+
+		<map:entry key="ls"><map:value>{ $language-summary-qname }</map:value></map:entry>
+		<map:entry key="language-summary"><map:value>{ $language-summary-qname }</map:value></map:entry>
+		<map:entry key="summary-language"><map:value>{ $language-summary-qname }</map:value></map:entry>
+		<map:entry key="language-of-summary"><map:value>{ $language-summary-qname }</map:value></map:entry>
+
+		<map:entry key="ms"><map:value>{ $supplementary-information-qname }</map:value></map:entry>
+		<map:entry key="supplementary-information"><map:value>{ $supplementary-information-qname }</map:value></map:entry>
+		<map:entry key="supplementary-info"><map:value>{ $supplementary-information-qname }</map:value></map:entry>
 	</map:map>
 );
 

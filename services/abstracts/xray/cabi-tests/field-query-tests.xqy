@@ -72,6 +72,22 @@ declare %test:case function test-conference-title-queries()
 	)
 };
 
+(: Additional Title Info :)
+declare %test:case function test-additional-title-info-queries()
+{
+	assert:equal (qe:parse ('at: "fungus"'),
+		cts:element-word-query ($qe:additional-title-info-qname, "fungus")
+	)
+	,
+	assert:equal (qe:parse ('additional-title-data: "fungus"'),
+		cts:element-word-query ($qe:additional-title-info-qname, "fungus")
+	)
+	,
+	assert:equal (qe:parse ('additional-title-info: "fungus"'),
+		cts:element-word-query ($qe:additional-title-info-qname, "fungus")
+	)
+};
+
 (: Author :)
 declare %test:case function test-author-queries()
 {
@@ -119,11 +135,11 @@ declare %test:case function test-abstract-queries()
 (: PA :)
 declare %test:case function test-PAN-queries()
 {
-	assert:equal (qe:parse ('pa: "23432345"'),
+	assert:equal (qe:parse ('pa: 23432345'),
 		cts:element-value-query ($qe:pan-qname, "23432345")
 	)
 	,
-	assert:equal (qe:parse ('pan: "23432345"'),
+	assert:equal (qe:parse ('pan: 23432345'),
 		cts:element-value-query ($qe:pan-qname, "23432345")
 	)
 };
@@ -131,11 +147,11 @@ declare %test:case function test-PAN-queries()
 (: ISSN :)
 declare %test:case function test-ISSN-queries()
 {
-	assert:equal (qe:parse ('sn: "2343-2345"'),
+	assert:equal (qe:parse ('sn: 2343-2345'),
 		cts:element-value-query ($qe:issn-qname, "2343-2345")
 	)
 	,
-	assert:equal (qe:parse ('issn: "2343-2345"'),
+	assert:equal (qe:parse ('issn: 2343-2345'),
 		cts:element-value-query ($qe:issn-qname, "2343-2345")
 	)
 };
@@ -143,11 +159,11 @@ declare %test:case function test-ISSN-queries()
 (: ISBN :)
 declare %test:case function test-ISBN-queries()
 {
-	assert:equal (qe:parse ('bn: "0-14-020652-3"'),
+	assert:equal (qe:parse ('bn: 0-14-020652-3'),
 		cts:element-value-query ($qe:isbn-qname, "0-14-020652-3")
 	)
 	,
-	assert:equal (qe:parse ('isbn: "0-14-020652-3"'),
+	assert:equal (qe:parse ('isbn: 0-14-020652-3'),
 		cts:element-value-query ($qe:isbn-qname, "0-14-020652-3")
 	)
 };
@@ -155,12 +171,128 @@ declare %test:case function test-ISBN-queries()
 (: DOI :)
 declare %test:case function test-DOI-queries()
 {
-	assert:equal (qe:parse ('oi: "10.1016/j.iheduc.2008.03.001"'),
+	assert:equal (qe:parse ('oi: 10.1016/j.iheduc.2008.03.001'),
 		cts:element-value-query ($qe:doi-qname, "10.1016/j.iheduc.2008.03.001")
 	)
 	,
-	assert:equal (qe:parse ('doi: "10.1016/j.iheduc.2008.03.001"'),
+	assert:equal (qe:parse ('doi: 10.1016/j.iheduc.2008.03.001'),
 		cts:element-value-query ($qe:doi-qname, "10.1016/j.iheduc.2008.03.001")
+	)
+};
+
+(: Author Affiliation :)
+declare %test:case function test-affiliation-queries()
+{
+	assert:equal (qe:parse ('aa: cambridge'),
+		cts:element-word-query ($qe:affiliation-qname, "cambridge")
+	)
+	,
+	assert:equal (qe:parse ('affiliation: cambridge'),
+		cts:element-word-query ($qe:affiliation-qname, "cambridge")
+	)
+	,
+	assert:equal (qe:parse ('author-affiliation: cambridge'),
+		cts:element-word-query ($qe:affiliation-qname, "cambridge")
+	)
+};
+
+(: Email :)
+declare %test:case function test-email-queries()
+{
+	assert:equal (qe:parse ('em: elmer.fudd@looneytunes.com'),
+		cts:element-value-query ($qe:email-qname, "elmer.fudd@looneytunes.com")
+	)
+	,
+	assert:equal (qe:parse ('email: elmer.fudd@looneytunes.com'),
+		cts:element-value-query ($qe:email-qname, "elmer.fudd@looneytunes.com")
+	)
+};
+
+(: Item Type :)
+declare %test:case function test-item-type-queries()
+{
+	assert:equal (qe:parse ('it: "Journal article"'),
+		cts:element-value-query ($qe:item-type-qname, "Journal article")
+	)
+	,
+	assert:equal (qe:parse ('item-type: "Journal article"'),
+		cts:element-value-query ($qe:item-type-qname, "Journal article")
+	)
+};
+
+(: Language :)
+declare %test:case function test-language-queries()
+{
+	assert:equal (qe:parse ('la: french'),
+		cts:element-word-query ($qe:language-qname, "french")
+	)
+	,
+	assert:equal (qe:parse ('lang: french'),
+		cts:element-word-query ($qe:language-qname, "french")
+	)
+	,
+	assert:equal (qe:parse ('language: french'),
+		cts:element-word-query ($qe:language-qname, "french")
+	)
+};
+
+(: Language of Summary :)
+declare %test:case function test-language-of-summary-queries()
+{
+	assert:equal (qe:parse ('ls: italian'),
+		cts:element-word-query ($qe:language-summary-qname, "italian")
+	)
+	,
+	assert:equal (qe:parse ('summary-language: italian'),
+		cts:element-word-query ($qe:language-summary-qname, "italian")
+	)
+	,
+	assert:equal (qe:parse ('language-summary: italian'),
+		cts:element-word-query ($qe:language-summary-qname, "italian")
+	)
+	,
+	assert:equal (qe:parse ('language-of-summary: italian'),
+		cts:element-word-query ($qe:language-summary-qname, "italian")
+	)
+};
+
+(: Supplementary Information :)
+declare %test:case function test-supplementary-information-queries()
+{
+	assert:equal (qe:parse ('ms: "panda bears are cute"'),
+		cts:element-word-query ($qe:supplementary-information-qname, "panda bears are cute")
+	)
+	,
+	assert:equal (qe:parse ('supplementary-information: "panda bears are cute"'),
+		cts:element-word-query ($qe:supplementary-information-qname, "panda bears are cute")
+	)
+	,
+	assert:equal (qe:parse ('supplementary-info: "panda bears are cute"'),
+		cts:element-word-query ($qe:supplementary-information-qname, "panda bears are cute")
+	)
+};
+
+(: Country of Publication :)
+declare %test:case function test-country-of-publication-queries()
+{
+	assert:equal (qe:parse ('cp: namibia'),
+		cts:element-word-query ($qe:country-qname, "namibia")
+	)
+	,
+	assert:equal (qe:parse ('country-pub: namibia'),
+		cts:element-word-query ($qe:country-qname, "namibia")
+	)
+	,
+	assert:equal (qe:parse ('pub-country: namibia'),
+		cts:element-word-query ($qe:country-qname, "namibia")
+	)
+	,
+	assert:equal (qe:parse ('country-publication: namibia'),
+		cts:element-word-query ($qe:country-qname, "namibia")
+	)
+	,
+	assert:equal (qe:parse ('country-of-publication: namibia'),
+		cts:element-word-query ($qe:country-qname, "namibia")
 	)
 };
 
