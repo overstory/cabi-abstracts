@@ -31,6 +31,7 @@ declare namespace cabi = "http://namespaces.cabi.org/namespaces/cabi";
 (: ------------------------------- :)
 
 declare variable $publisher-qname := xs:QName ("cabi:publisher");
+declare variable $document-title-qname := xs:QName ("cabi:document-title");
 declare variable $item-title-qname := xs:QName ("cabi:item-title");
 declare variable $non-english-title-qname := xs:QName ("cabi:non-english-title");
 declare variable $additional-title-info-qname := xs:QName ("cabi:additional-title-info");
@@ -52,15 +53,27 @@ declare variable $item-type-qname := xs:QName ("cabi:item-type");
 declare variable $language-qname := xs:QName ("cabi:language");
 declare variable $language-summary-qname := xs:QName ("cabi:language-summary");
 declare variable $supplementary-information-qname := xs:QName ("cabi:supplementary-information");
+declare variable $city-qname := xs:QName ("cabi:city");
+declare variable $issue-qname := xs:QName ("cabi:issue");
+declare variable $volume-qname := xs:QName ("cabi:volume");
+declare variable $page-range-qname := xs:QName ("cabi:page-range");
+declare variable $number-of-references-qname := xs:QName ("cabi:number-of-references");
+declare variable $url-qname := xs:QName ("cabi:url");
+declare variable $year-qname := xs:QName ("cabi:year");
 
 (: ------------------------------- :)
 
 (: ToDo: Compound elements: affiliation, author, editor :)
 (: ToDo: Look at iso country code on language element, also on country element :)
-(: FixMe: Document Title Descriptor: ED :)
-(: FixMe: LP (Language of Publisher) is matched as publisher city in XSLT :)
+(: FixMe: LP (Location of Publisher <city>) needs remodeling :)
+(: FixMe: number of references: Need to search attribute @orginal-content :)
+(: FixMe: What about typed values (numeric, dates)? :)
 
-declare private variable $value-fields := ( $pan-qname, $issn-qname, $isbn-qname, $doi-qname, $email-qname, $item-type-qname );
+(: Queries against QNames in this list will be generated as element value queries rather than as word queries :)
+declare private variable $value-fields := (
+	$url-qname, $pan-qname, $issn-qname, $isbn-qname, $doi-qname, $email-qname,
+	$item-type-qname, $issue-qname, $volume-qname, $number-of-references-qname, $year-qname
+);
 
 declare private variable $field-qnames as map:map := map:map (
 	<map:map xmlns:map="http://marklogic.com/xdmp/map">
@@ -68,6 +81,9 @@ declare private variable $field-qnames as map:map := map:map (
 		<map:entry key="pub"><map:value>{ $publisher-qname }</map:value></map:entry>
 		<map:entry key="publisher"><map:value>{ $publisher-qname }</map:value></map:entry>
 
+		<map:entry key="do"><map:value>{ $document-title-qname }</map:value></map:entry>
+		<map:entry key="doc-title"><map:value>{ $document-title-qname }</map:value></map:entry>
+		<map:entry key="document-title"><map:value>{ $document-title-qname }</map:value></map:entry>
 		<map:entry key="et"><map:value>{ $item-title-qname }</map:value></map:entry>
 		<map:entry key="item-title"><map:value>{ $item-title-qname }</map:value></map:entry>
 		<map:entry key="ft"><map:value>{ $non-english-title-qname }</map:value></map:entry>
@@ -139,6 +155,30 @@ declare private variable $field-qnames as map:map := map:map (
 		<map:entry key="ms"><map:value>{ $supplementary-information-qname }</map:value></map:entry>
 		<map:entry key="supplementary-information"><map:value>{ $supplementary-information-qname }</map:value></map:entry>
 		<map:entry key="supplementary-info"><map:value>{ $supplementary-information-qname }</map:value></map:entry>
+
+		<map:entry key="lp"><map:value>{ $city-qname }</map:value></map:entry>
+		<map:entry key="pub-location"><map:value>{ $city-qname }</map:value></map:entry>
+		<map:entry key="location-of-publisher"><map:value>{ $city-qname }</map:value></map:entry>
+
+		<map:entry key="no"><map:value>{ $issue-qname }</map:value></map:entry>
+		<map:entry key="issue"><map:value>{ $issue-qname }</map:value></map:entry>
+
+		<map:entry key="vl"><map:value>{ $volume-qname }</map:value></map:entry>
+		<map:entry key="volume"><map:value>{ $volume-qname }</map:value></map:entry>
+
+		<map:entry key="pp"><map:value>{ $page-range-qname }</map:value></map:entry>
+		<map:entry key="pages"><map:value>{ $page-range-qname }</map:value></map:entry>
+		<map:entry key="page-range"><map:value>{ $page-range-qname }</map:value></map:entry>
+
+		<map:entry key="re"><map:value>{ $number-of-references-qname }</map:value></map:entry>
+		<map:entry key="num-refs"><map:value>{ $number-of-references-qname }</map:value></map:entry>
+		<map:entry key="number-of-references"><map:value>{ $number-of-references-qname }</map:value></map:entry>
+
+		<map:entry key="ur"><map:value>{ $url-qname }</map:value></map:entry>
+		<map:entry key="url"><map:value>{ $url-qname }</map:value></map:entry>
+
+		<map:entry key="yr"><map:value>{ $year-qname }</map:value></map:entry>
+		<map:entry key="year"><map:value>{ $year-qname }</map:value></map:entry>
 	</map:map>
 );
 

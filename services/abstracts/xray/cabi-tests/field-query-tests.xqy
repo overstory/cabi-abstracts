@@ -31,6 +31,18 @@ declare %test:case function test-publisher-queries()
 (: Title :)
 declare %test:case function test-title-queries()
 {
+	assert:equal (qe:parse ('do: "fuzzy bunnies"'),
+		cts:element-word-query ($qe:document-title-qname, "fuzzy bunnies")
+	)
+	,
+	assert:equal (qe:parse ('doc-title: "fuzzy bunnies"'),
+		cts:element-word-query ($qe:document-title-qname, "fuzzy bunnies")
+	)
+	,
+	assert:equal (qe:parse ('document-title: "fuzzy bunnies"'),
+		cts:element-word-query ($qe:document-title-qname, "fuzzy bunnies")
+	)
+	,
 	assert:equal (qe:parse ('et: "fuzzy bunnies"'),
 		cts:element-word-query ($qe:item-title-qname, "fuzzy bunnies")
 	)
@@ -293,6 +305,103 @@ declare %test:case function test-country-of-publication-queries()
 	,
 	assert:equal (qe:parse ('country-of-publication: namibia'),
 		cts:element-word-query ($qe:country-qname, "namibia")
+	)
+};
+
+(: Location of Publisher :)
+declare %test:case function test-location-of-publisher-queries()
+{
+	assert:equal (qe:parse ('lp: paris'),
+		cts:element-word-query ($qe:city-qname, "paris")
+	)
+	,
+	assert:equal (qe:parse ('pub-location: paris'),
+		cts:element-word-query ($qe:city-qname, "paris")
+	)
+	,
+	assert:equal (qe:parse ('location-of-publisher: paris'),
+		cts:element-word-query ($qe:city-qname, "paris")
+	)
+};
+
+(: Issue :)
+declare %test:case function test-issue-queries()
+{
+	assert:equal (qe:parse ('no: 146'),
+		cts:element-value-query ($qe:issue-qname, "146")
+	)
+	,
+	assert:equal (qe:parse ('issue: 146'),
+		cts:element-value-query ($qe:issue-qname, "146")
+	)
+};
+
+(: Volume :)
+declare %test:case function test-volume-queries()
+{
+	assert:equal (qe:parse ('vl: 99'),
+		cts:element-value-query ($qe:volume-qname, "99")
+	)
+	,
+	assert:equal (qe:parse ('volume: 99'),
+		cts:element-value-query ($qe:volume-qname, "99")
+	)
+};
+
+(: URL :)
+declare %test:case function test-url-queries()
+{
+	assert:equal (qe:parse ('ur: "http://google.com"'),
+		cts:element-value-query ($qe:url-qname, "http://google.com")
+	)
+	,
+	assert:equal (qe:parse ('url: "http://google.com"'),
+		cts:element-value-query ($qe:url-qname, "http://google.com")
+	)
+};
+
+(: Year :)
+declare %test:case function test-year-queries()
+{
+	assert:equal (qe:parse ('yr: 1927'),
+		cts:element-value-query ($qe:year-qname, "1927")
+	)
+	,
+	assert:equal (qe:parse ('year: 1927'),
+		cts:element-value-query ($qe:year-qname, "1927")
+	)
+};
+
+
+(: Number of References :)
+declare %test:case function test-num-refs-queries()
+{
+	assert:equal (qe:parse ('re: 12'),
+		cts:element-value-query ($qe:number-of-references-qname, "12")
+	)
+	,
+	assert:equal (qe:parse ('num-refs: 12'),
+		cts:element-value-query ($qe:number-of-references-qname, "12")
+	)
+	,
+	assert:equal (qe:parse ('number-of-references: 12'),
+		cts:element-value-query ($qe:number-of-references-qname, "12")
+	)
+};
+
+(: Page Range :)
+declare %test:case function test-page-range-queries()
+{
+	assert:equal (qe:parse ('pp: 42'),
+		cts:element-word-query ($qe:page-range-qname, "42")
+	)
+	,
+	assert:equal (qe:parse ('pages: 42'),
+		cts:element-word-query ($qe:page-range-qname, "42")
+	)
+	,
+	assert:equal (qe:parse ('page-range: 42'),
+		cts:element-word-query ($qe:page-range-qname, "42")
 	)
 };
 
