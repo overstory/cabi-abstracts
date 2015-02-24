@@ -191,7 +191,7 @@ declare private variable $field-mappings as map:map := map:map (
 	</map:map>
 );
 
-declare private function qe:load-query-function-enties (
+declare private function qe:load-query-function-entries (
 ) as empty-sequence()
 {
 	if (fn:empty (map:get ($field-mappings, "de")))
@@ -261,7 +261,7 @@ declare private function qe:lookup-name (
 	$name as xs:string
 ) as item()+
 {
-	let $_ := qe:load-query-function-enties()
+	let $_ := qe:load-query-function-entries()
 	let $value := map:get ($field-mappings, fn:lower-case ($name))
 
 	return
