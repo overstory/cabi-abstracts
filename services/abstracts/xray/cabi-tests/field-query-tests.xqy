@@ -406,17 +406,143 @@ declare %test:case function test-page-range-queries()
 };
 
 (: Descriptors :)
-(:
-declare %test:case function test-descriptor-queries()
+declare %test:case function test-de-queries()
 {
-	assert:equal (qe:parse ('ab: "flesh eating zombies"'),
-		cts:element-word-query ($qe:abstract-text-qname, "flesh eating zombies")
+	assert:equal (qe:parse ('de: wheat'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "wheat", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "de", "exact")
+		))
 	)
 	,
-	assert:equal (qe:parse ('abstract: "flesh eating zombies"'),
-		cts:element-word-query ($qe:abstract-text-qname, "flesh eating zombies")
+	assert:equal (qe:parse ('descriptor: wheat'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "wheat", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "de", "exact")
+		))
 	)
 };
- :)
+
+(: Organism Descriptors :)
+declare %test:case function test-od-queries()
+{
+	assert:equal (qe:parse ('od: kracken'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "kracken", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "od", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('organism-descriptor: kracken'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "kracken", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "od", "exact")
+		))
+	)
+};
+
+(: Geographic Location :)
+declare %test:case function test-gl-queries()
+{
+	assert:equal (qe:parse ('gl: arctic'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "arctic", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "gl", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('geo-loc: arctic'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "arctic", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "gl", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('geo-location: arctic'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "arctic", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "gl", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('geographic-location: arctic'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "arctic", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "gl", "exact")
+		))
+	)
+};
+
+(: Identifier :)
+declare %test:case function test-id-queries()
+{
+	assert:equal (qe:parse ('id: xyzzy'),
+		cts:and-query ((
+			cts:element-value-query ($qe:alternate-term-qname, "xyzzy", "exact"),
+			cts:element-attribute-value-query ($qe:alternate-term-qname, $qe:vocab-attr-qname, "id", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('identifier: xyzzy'),
+		cts:and-query ((
+			cts:element-value-query ($qe:alternate-term-qname, "xyzzy", "exact"),
+			cts:element-attribute-value-query ($qe:alternate-term-qname, $qe:vocab-attr-qname, "id", "exact")
+		))
+	)
+};
+
+(: Broader :)
+declare %test:case function test-up-queries()
+{
+	assert:equal (qe:parse ('up: mammal'),
+		cts:and-query ((
+			cts:element-value-query ($qe:ancestor-term-qname, "mammal", "exact"),
+			cts:element-attribute-value-query ($qe:ancestor-term-qname, $qe:vocab-attr-qname, "up", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('broader: mammal'),
+		cts:and-query ((
+			cts:element-value-query ($qe:ancestor-term-qname, "mammal", "exact"),
+			cts:element-attribute-value-query ($qe:ancestor-term-qname, $qe:vocab-attr-qname, "up", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('wider: mammal'),
+		cts:and-query ((
+			cts:element-value-query ($qe:ancestor-term-qname, "mammal", "exact"),
+			cts:element-attribute-value-query ($qe:ancestor-term-qname, $qe:vocab-attr-qname, "up", "exact")
+		))
+	)
+};
+
+(: Subject :)
+declare %test:case function test-subject-queries()
+{
+	assert:equal (qe:parse ('subject: pest'),
+		cts:or-query ((
+			cts:and-query ((
+				cts:element-value-query ($qe:preferred-term-qname, "pest", "exact"),
+				cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "de", "exact")
+			)),
+			cts:and-query ((
+				cts:element-value-query ($qe:preferred-term-qname, "pest", "exact"),
+				cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "od", "exact")
+			)),
+			cts:and-query ((
+				cts:element-value-query ($qe:preferred-term-qname, "pest", "exact"),
+				cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "gl", "exact")
+			)),
+			cts:and-query ((
+				cts:element-value-query ($qe:alternate-term-qname, "pest", "exact"),
+				cts:element-attribute-value-query ($qe:alternate-term-qname, $qe:vocab-attr-qname, "id", "exact")
+			)),
+			cts:and-query ((
+				cts:element-value-query ($qe:ancestor-term-qname, "pest", "exact"),
+				cts:element-attribute-value-query ($qe:ancestor-term-qname, $qe:vocab-attr-qname, "up", "exact")
+			))
+		))
+	)
+};
 
 

@@ -27,6 +27,7 @@ import module namespace p = "com.blakeley.xqysp" at "xqysp.xqy";
 declare default function namespace "http://www.w3.org/2005/xpath-functions";
 
 declare namespace cabi = "http://namespaces.cabi.org/namespaces/cabi";
+declare namespace xsi = "http://www.w3.org/2001/XMLSchema-instance";
 
 (: ------------------------------- :)
 
@@ -60,6 +61,11 @@ declare variable $page-range-qname := xs:QName ("cabi:page-range");
 declare variable $number-of-references-qname := xs:QName ("cabi:number-of-references");
 declare variable $url-qname := xs:QName ("cabi:url");
 declare variable $year-qname := xs:QName ("cabi:year");
+declare variable $preferred-term-qname := xs:QName ("cabi:preferred-term");
+declare variable $alternate-term-qname := xs:QName ("cabi:alternate-term");
+declare variable $ancestor-term-qname := xs:QName ("cabi:ancestor-term");
+
+declare variable $vocab-attr-qname := xs:QName ("vocab");
 
 (: ------------------------------- :)
 
@@ -75,7 +81,7 @@ declare private variable $value-fields := (
 	$item-type-qname, $issue-qname, $volume-qname, $number-of-references-qname, $year-qname
 );
 
-declare private variable $field-qnames as map:map := map:map (
+declare private variable $field-mappings as map:map := map:map (
 	<map:map xmlns:map="http://marklogic.com/xdmp/map">
 		<map:entry key="pb"><map:value>{ $publisher-qname }</map:value></map:entry>
 		<map:entry key="pub"><map:value>{ $publisher-qname }</map:value></map:entry>
@@ -179,43 +185,79 @@ declare private variable $field-qnames as map:map := map:map (
 
 		<map:entry key="yr"><map:value>{ $year-qname }</map:value></map:entry>
 		<map:entry key="year"><map:value>{ $year-qname }</map:value></map:entry>
+
+		<!-- Mappings that use higher order functions are added programmatically because functions can't be atomized as an XML initializer  -->
 	</map:map>
 );
 
+declare private function qe:load-query-function-enties (
+) as empty-sequence()
+{
+	if (fn:empty (map:get ($field-mappings, "de")))
+	then (
+		map:put ($field-mappings, "de", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "de")),
+		map:put ($field-mappings, "descriptor", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "de")),
+
+		map:put ($field-mappings, "od", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "od")),
+		map:put ($field-mappings, "organism-descriptor", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "od")),
+
+		map:put ($field-mappings, "gl", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "gl")),
+		map:put ($field-mappings, "geo-loc", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "gl")),
+		map:put ($field-mappings, "geo-location", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "gl")),
+		map:put ($field-mappings, "geographic-location", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "gl")),
+
+		map:put ($field-mappings, "id", qe:subject-code-query(?, ?, $alternate-term-qname, $vocab-attr-qname, "id")),
+		map:put ($field-mappings, "identifier", qe:subject-code-query(?, ?, $alternate-term-qname, $vocab-attr-qname, "id")),
+
+		map:put ($field-mappings, "up", qe:subject-code-query(?, ?, $ancestor-term-qname, $vocab-attr-qname, "up")),
+		map:put ($field-mappings, "wider", qe:subject-code-query(?, ?, $ancestor-term-qname, $vocab-attr-qname, "up")),
+		map:put ($field-mappings, "broader", qe:subject-code-query(?, ?, $ancestor-term-qname, $vocab-attr-qname, "up")),
+
+		map:put ($field-mappings, "subject",
+			(
+				qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "de"),
+				qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "od"),
+				qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "gl"),
+				qe:subject-code-query(?, ?, $alternate-term-qname, $vocab-attr-qname, "id"),
+				qe:subject-code-query(?, ?, $ancestor-term-qname, $vocab-attr-qname, "up")
+			)
+		)
+	) else ()
+};
+
+
+declare private function qe:subject-code-query (
+	$op as xs:string,
+	$terms as element()*,
+	$element-qname as xs:QName,
+	$attribute-qname as xs:QName,
+	$attribute-value as xs:string
+) as cts:query
+{
+	cts:and-query ((
+		cts:element-value-query ($element-qname, $terms, "exact"),
+		cts:element-attribute-value-query ($element-qname, $attribute-qname, $attribute-value, "exact")
+	))
+};
+
 (: ------------------------------- :)
 
-declare private function qe:expr(
-  $op as xs:string,
-  $list as cts:query*)
-as cts:query?
+declare private function qe:lookup-name (
+	$name as xs:string
+) as item()+
 {
-  (: To implement a new operator, simply add it to this code :)
-  if (empty($list)) then ()
-  (: simple boolean :)
-  else if (empty($op) or $op eq 'and') then cts:and-query($list)
-  else if ($op = ('not', '-')) then cts:not-query($list)
-  else if ($op = ('or','|')) then cts:or-query($list)
-  (: near and variations :)
-  else if ($op eq 'near') then cts:near-query($list)
-  else if (starts-with($op, 'near/')) then cts:near-query(
-    $list, xs:double(substring-after($op, 'near/')))
-  else if ($op eq 'onear') then cts:near-query($list, (), 'ordered')
-  else if (starts-with($op, 'onear/')) then cts:near-query(
-    $list, xs:double(substring-after($op, 'onear/')), 'ordered')
-  else error((), 'UNEXPECTED')
+	let $_ := qe:load-query-function-enties()
+	let $value := map:get ($field-mappings, fn:lower-case ($name))
+
+	return
+	if (fn:empty ($value))
+	then xs:QName ("cabi:" || $name)
+	else $value
 };
 
-declare private function qe:canonical-qname (
-	$name as xs:string?
-) as xs:QName+
-{
-	let $value := map:get ($field-qnames, fn:lower-case ($name))
+(: ------------------------------- :)
 
-	return if (fn:exists ($value)) then $value else xs:QName ("cabi:" || $name)
-};
-
-
-declare private function qe:field (
+declare private function qe:query-from-qname (
 	$qnames as xs:QName+,
 	$op as xs:string?,
 	$list as element()*
@@ -239,6 +281,48 @@ declare private function qe:field (
 			else cts:element-word-query ($qnames, $list)
 };
 
+declare private function qe:field (
+	$name as xs:string,
+	$op as xs:string?,
+	$list as element()*
+) as cts:query?
+{
+	let $targets := qe:lookup-name ($name)
+
+	return
+	typeswitch ($targets[1])
+	case xs:QName return qe:query-from-qname ($targets, $op, $list)
+	case text() return qe:query-from-qname (xs:QName ($targets), $op, $list)
+	case function(xs:string, element()*) as cts:query
+		return
+		if (fn:count ($targets) = 1)
+		then $targets ($op, $list)
+		else cts:or-query ($targets ! . ($op, $list))		(: This iterates over all the functions, invoking each one, wrapping in an or-query :)
+	default return cts:and-query ((xdmp:describe ($targets)))	(: FixMe: This means something unexpected has happened :)
+};
+
+declare private function qe:expr(
+  $op as xs:string,
+  $list as cts:query*)
+as cts:query?
+{
+  (: To implement a new operator, simply add it to this code :)
+  if (empty($list)) then ()
+  (: simple boolean :)
+  else if (empty($op) or $op eq 'and') then cts:and-query($list)
+  else if ($op = ('not', '-')) then cts:not-query($list)
+  else if ($op = ('or','|')) then cts:or-query($list)
+  (: near and variations :)
+  else if ($op eq 'near') then cts:near-query($list)
+  else if (starts-with($op, 'near/')) then cts:near-query(
+    $list, xs:double(substring-after($op, 'near/')))
+  else if ($op eq 'onear') then cts:near-query($list, (), 'ordered')
+  else if (starts-with($op, 'onear/')) then cts:near-query(
+    $list, xs:double(substring-after($op, 'onear/')), 'ordered')
+  else error((), 'UNEXPECTED')
+};
+
+
 declare function qe:eval($n as element())
 as cts:query?
 {
@@ -249,8 +333,7 @@ as cts:query?
   (: This code works as long as your field names match the QNames.
    : If they do not, replace xs:QName with a lookup function.
    :)
-  case element(p:field) return qe:field(
-    qe:canonical-qname (fn:tokenize ($n/@name/string(), "(\s+)|(\s*,\s*)")), $n/@op, $n/*)
+  case element(p:field) return qe:field ($n/@name/string(), $n/@op, $n/*)
   case element(p:group) return (
     if (count($n/*, 2) lt 2) then qe:eval($n/*)
     else cts:and-query(qe:eval($n/*)))
