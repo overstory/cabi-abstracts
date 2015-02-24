@@ -64,6 +64,7 @@ declare variable $year-qname := xs:QName ("cabi:year");
 declare variable $preferred-term-qname := xs:QName ("cabi:preferred-term");
 declare variable $alternate-term-qname := xs:QName ("cabi:alternate-term");
 declare variable $ancestor-term-qname := xs:QName ("cabi:ancestor-term");
+declare variable $term-qname := xs:QName ("cabi:term");
 
 declare variable $vocab-attr-qname := xs:QName ("vocab");
 
@@ -221,7 +222,21 @@ declare private function qe:load-query-function-enties (
 				qe:subject-code-query(?, ?, $alternate-term-qname, $vocab-attr-qname, "id"),
 				qe:subject-code-query(?, ?, $ancestor-term-qname, $vocab-attr-qname, "up")
 			)
-		)
+		),
+
+		map:put ($field-mappings, "ry", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "ry")),
+		map:put ($field-mappings, "registry", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "ry")),
+		map:put ($field-mappings, "cas-registry", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "ry")),
+		map:put ($field-mappings, "cas", qe:subject-code-query(?, ?, $preferred-term-qname, $vocab-attr-qname, "ry")),
+
+		map:put ($field-mappings, "cc", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "cc")),
+		map:put ($field-mappings, "cabi-code", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "cc")),
+		map:put ($field-mappings, "cabicode", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "cc")),
+
+		map:put ($field-mappings, "sc", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "sc")),
+		map:put ($field-mappings, "cabi-subject", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "sc")),
+		map:put ($field-mappings, "cabisubject", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "sc")),
+		map:put ($field-mappings, "subject-code", qe:subject-code-query(?, ?, $term-qname, $vocab-attr-qname, "sc"))
 	) else ()
 };
 

@@ -516,6 +516,95 @@ declare %test:case function test-up-queries()
 	)
 };
 
+(: CAS Registry Numbers :)
+declare %test:case function test-registry-queries()
+{
+	assert:equal (qe:parse ('ry: 62-50-0'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "62-50-0", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "ry", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('registry: 62-50-0'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "62-50-0", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "ry", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('cas-registry: 62-50-0'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "62-50-0", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "ry", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('cas: 62-50-0'),
+		cts:and-query ((
+			cts:element-value-query ($qe:preferred-term-qname, "62-50-0", "exact"),
+			cts:element-attribute-value-query ($qe:preferred-term-qname, $qe:vocab-attr-qname, "ry", "exact")
+		))
+	)
+};
+
+(: CABI Code :)
+declare %test:case function test-cabi-code-queries()
+{
+	assert:equal (qe:parse ('cc: fish'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "fish", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "cc", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('cabi-code: fish'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "fish", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "cc", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('cabicode: fish'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "fish", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "cc", "exact")
+		))
+	)
+};
+
+(: CABI Subject :)
+declare %test:case function test-cabi-subject-queries()
+{
+	assert:equal (qe:parse ('sc: bugs'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "bugs", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "sc", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('subject-code: bugs'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "bugs", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "sc", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('cabi-subject: bugs'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "bugs", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "sc", "exact")
+		))
+	)
+	,
+	assert:equal (qe:parse ('cabisubject: bugs'),
+		cts:and-query ((
+			cts:element-value-query ($qe:term-qname, "bugs", "exact"),
+			cts:element-attribute-value-query ($qe:term-qname, $qe:vocab-attr-qname, "sc", "exact")
+		))
+	)
+};
+
 (: Subject :)
 declare %test:case function test-subject-queries()
 {
