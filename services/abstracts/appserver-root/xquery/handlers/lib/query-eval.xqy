@@ -288,12 +288,36 @@ declare private function qe:query-from-qname (
 	if (empty ($list))
 	then cts:element-query ($qnames, cts:and-query (()))
 	else
-		if ($op = ('>', '>=', '<', '<='))
-		then cts:element-range-query ($qnames, $op, $list)
+	    if ($list instance of element(p:range)) then qe:element-range-query-from-qname ($qnames, $op, $list)
+		else if ($op = ('>', '>=', '<', '<=')) then cts:element-range-query ($qnames, $op, $list)
 		else
-			if (($op eq '=') or ($value-fields = $qnames))
+			if (($op = ('=')) or ($value-fields = $qnames))
 			then cts:element-value-query ($qnames, $list)
 			else cts:element-word-query ($qnames, $list)
+};
+
+declare private function qe:element-range-query-from-qname(
+    $qnames as xs:QName+,
+	$op as xs:string?,
+	$list as element()*
+) as cts:query?
+{
+    (: start range value is = if no end value :)
+    let $end-range-count   :=   fn:count($list/p:end-value)
+    let $start-range-op    :=   if ($end-range-count > 0)
+                                then if (data ($list/@range-type) = "inclusive") then ">=" else ">"
+                                else "="
+    let $end-range-op      :=   if ($end-range-count > 0) 
+                                then if (data ($list/@range-type) = "inclusive") then "<=" else "<"
+                                else ()
+    return cts:and-query(
+         (
+            cts:element-range-query($qnames,$start-range-op, ($list/p:start-value/p:literal/text())),
+            if ($end-range-count > 0) 
+            then cts:element-range-query($qnames,$end-range-op, ($list/p:end-value/p:literal/text()))
+            else ()
+         )
+    ) 
 };
 
 declare private function qe:field (

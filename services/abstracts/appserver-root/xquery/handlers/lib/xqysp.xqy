@@ -44,6 +44,10 @@ declare default element namespace "com.blakeley.xqysp";
  : number ::= digit+
  : letter ::= [A-Za-z]
  : digit ::= [0-9]
+ : CAB DIRECT SYNTAX
+ :  group expression::= [range-start TO range-end] indicates a range to eval.
+ :  TO and range-end are optional.  if TO then Must have range-end.
+ : 
  :)
 
 (:
@@ -74,9 +78,16 @@ declare variable $TOK-NOT := (cts:word('NOT'), cts:word('not'));
 declare variable $TOK-ONEAR := (cts:word('ONEAR'), cts:word('onear'));
 declare variable $TOK-OR := (cts:word('OR'), cts:word('or'));
 declare variable $TOK-QUOTE := cts:punctuation('"');
+declare variable $TOK-QUOTE-ESCAPE := cts:punctuation("\");
 declare variable $TOK-SPACE := cts:space(' ');
 declare variable $TOK-UNDERSCORE := cts:punctuation('_');
 declare variable $TOK-DOT := cts:punctuation('.');
+
+declare variable $CD-RANGE-START-INCLUSIVE := cts:punctuation('[');
+declare variable $CD-RANGE-END-INCLUSIVE := cts:punctuation(']');
+declare variable $CD-RANGE-START-EXCLUSIVE := cts:punctuation('{');
+declare variable $CD-RANGE-END-EXCLUSIVE := cts:punctuation('}');
+declare variable $CD-RANGE-TO := (cts:punctuation('TO'),cts:punctuation('To'),cts:punctuation('to'));
 
 declare variable $TOKS-FIELD := ( cts:punctuation(':'), cts:punctuation('='), $TOKS-INEQ);
 (: for range query terms - inequality :)
@@ -182,7 +193,15 @@ declare private function p:peek($n as xs:integer) as cts:token*
   subsequence($TOKS, $X, $n)
 };
 
+declare private function p:peek-behind($n as xs:integer) as cts:token*
+{
+    let $peek-back-position := if (($X - $n) <= 0) then 1 else $X - $n
+    return  subsequence($TOKS,$peek-back-position, 1)
+};
+
 declare private function p:peek() as cts:token? { p:peek(1) };
+
+declare private function p:peek-behind() as cts:token{ p:peek-behind(1) };
 
 declare private function p:rewind($n as xs:integer) as empty-sequence()
 {
@@ -206,6 +225,20 @@ as cts:token*
   if (empty($tok)) then ()
   else if ($tok = $halt) then p:rewind(1)
   else ($tok, p:next-until(p:next(), $halt))
+};
+
+declare private function p:next-until-ignore-prefix($tok as cts:token?, $halt as cts:token+, $ignore-if-prefixed-with as cts:token)
+as cts:token*
+{
+  if (not($DEBUG)) then () else p:debug-state(
+    ('next-until-ignore: tok', $tok, 'halt', $halt)),
+  if (empty($tok)) then ()
+  else if ($tok eq $ignore-if-prefixed-with and (p:peek() = $halt)) then
+    let $add-escaped-tok := p:next()
+    let $continue-tok := p:next()
+    return ($add-escaped-tok, p:next-until-ignore-prefix ($continue-tok,$halt,$ignore-if-prefixed-with))
+  else if ($tok = $halt) then p:rewind(1)
+  else ($tok, p:next-until-ignore-prefix(p:next(), $halt,$ignore-if-prefixed-with))
 };
 
 (: list may contain strings or nodes :)
@@ -283,7 +316,9 @@ as xs:string?
       p:next-until(
         $next,
         ($TOKS-FIELD, $TOK-GROUP-START, $TOK-GROUP-END,
-          $TOK-QUOTE, $TOK-SPACE))),
+        $CD-RANGE-START-INCLUSIVE, $CD-RANGE-END-INCLUSIVE,
+        $CD-RANGE-START-EXCLUSIVE, $CD-RANGE-END-EXCLUSIVE, 
+        $CD-RANGE-TO, $TOK-QUOTE, $TOK-SPACE))),
     '')
   else (
     $tok,
@@ -302,8 +337,9 @@ as xs:string?
     'UNEXPECTED', ('not a quote', $tok))
   else if (empty($next) or $next eq $TOK-QUOTE) then ()
   else string-join(
-    ($next, p:next-until(p:next(), $TOK-QUOTE), p:skip()),
+        ($next, p:next-until-ignore-prefix(p:next(), $TOK-QUOTE, $TOK-QUOTE-ESCAPE), p:skip()),
     '')
+
 };
 
 declare private function p:literal(
@@ -416,12 +452,41 @@ as element()?
   (: handle prefix operator :)
   else if ($tok = $TOKS-PREFIX) then p:maybe-wrap-expr(
     'prefix', $tok, p:group($next, p:next()))
-  (: start of group :)
+  (: start of group :) 
+  else if ($tok = $CD-RANGE-START-INCLUSIVE) then p:range($tok,$next,"inclusive", $CD-RANGE-END-INCLUSIVE)
+  else if ($tok = $CD-RANGE-START-EXCLUSIVE) then p:range($tok,$next,"exclusive", $CD-RANGE-END-EXCLUSIVE)
   else if ($tok eq $TOK-GROUP-START) then p:maybe-wrap(
     'group', p:expr($next, p:next(), $TOK-GROUP-END))
   (: just a term after all :)
   else p:term($tok, $next)
 };
+
+declare private function p:range(
+    $tok as cts:token?,
+    $next as cts:token?, 
+    $range-type as xs:string,
+    $range-end as cts:token) 
+ as element()?
+ {
+    if (not($DEBUG)) then () else p:debug-state(
+        ('range:', $tok, 'next', $next)),
+    (: range in form [ {start-value [field-prefix + : ] { [TO | to | To] end-value] } } ] :)
+    (:get values from start ([) to closing (]) or TO keyword :)
+    let $range-elements := p:expr($next, p:next(), $range-end)
+    return element range{
+      attribute range-type {$range-type},
+       if (not (empty ($range-elements))) then
+            (
+                if (fn:count ($range-elements) >= 1) 
+                then element start-value {$range-elements[1]} 
+                else (),
+                if (fn:count ($range-elements) >= 3 and ($range-elements[2]/text() = $CD-RANGE-TO)) 
+                then element end-value {$range-elements[3]} 
+                else ()
+             )
+        else ()
+     }
+ };
 
 declare private function p:infix-op(
   $op as cts:token,

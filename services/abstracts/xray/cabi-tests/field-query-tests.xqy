@@ -634,4 +634,3 @@ declare %test:case function test-subject-queries()
 	)
 };
 
-

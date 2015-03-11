@@ -7,7 +7,6 @@ import module namespace qe = "com.blakeley.xqysp.query-eval" at "../../appserver
 
 declare namespace cts = "http://marklogic.com/cts";
 
-
 declare %test:case function hello-world()
 {
 	assert:true(true())
@@ -80,5 +79,34 @@ declare %test:case function should-grouped-and-or-not-query()
 	)
 };
 
+declare %test:case function should-return-range-query-equals-value()
+{
+	assert:equal (qe:parse ("yr:[2000]"),
+		cts:and-query ((
+			cts:element-range-query (fn:QName("http://namespaces.cabi.org/namespaces/cabi","cabi:year"), "=", xs:untypedAtomic("2000"), (), 1), ()
+		))
+	)
+};
 
+declare %test:case function should-return-range-query-inclusive-start-end-values()
+{
+	assert:equal (qe:parse ("yr:[2000 to 2014]"),
+		cts:and-query ((
+			cts:element-range-query (fn:QName("http://namespaces.cabi.org/namespaces/cabi","cabi:year"), ">=", xs:untypedAtomic("2000"), (), 1), 
+			cts:element-range-query (fn:QName("http://namespaces.cabi.org/namespaces/cabi","cabi:year"), "<=", xs:untypedAtomic("2014"), (), 1)
+			)
+		)
+	)
+};
+
+declare %test:case function should-return-range-query-exclusive-start-end-values()
+{
+	assert:equal (qe:parse ("ex:{20001231231 to 201123131321}"),
+		cts:and-query ((
+			cts:element-range-query (fn:QName("http://namespaces.cabi.org/namespaces/cabi","cabi:ex"), ">", xs:untypedAtomic("20001231231"), (), 1), 
+			cts:element-range-query (fn:QName("http://namespaces.cabi.org/namespaces/cabi","cabi:ex"), "<", xs:untypedAtomic("201123131321"), (), 1)
+			)
+		)
+	)
+};
 
